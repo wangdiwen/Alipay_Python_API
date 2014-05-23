@@ -98,6 +98,7 @@ Steven Wang，
 
 如果你碰巧使用了这份 SDK、发现了 Bug、或者想学习和交流的话，
 
-欢迎与我联系: dw_wang126@126.com
+欢迎给我 E-mail: dw_wang126@126.com
+也可以 + 我的 QQ：785644342（在验证中最好说明来自 Github）
 
-Good Luck!
+Good Luck! ^_^
