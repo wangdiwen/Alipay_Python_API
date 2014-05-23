@@ -1,0 +1,114 @@
+#!/bin/sh
+#
+# chkconfig: 35 90 90
+# description: start and stop the uWSGI server.
+
+# Avoid using root's TMPDIR
+unset TMPDIR
+
+RETVAL=1
+KIND="uWSGI"
+uwsgi_bin=/opt/python-2.7.5/bin/uwsgi
+ini_file=/opt/www/mysite/mysite/django_uwsgi.ini
+pid_file=/opt/www/mysite/logs/uwsgi/uwsgi.pid
+log_file=/opt/www/mysite/logs/uwsgi/uwsgi.log
+
+[ -x $uwsgi_bin ] || exit 2
+
+start() {
+    status
+    ret_code=$?
+    RETVAL=1
+    if [ $ret_code -ne 0 ];then
+        $uwsgi_bin --ini $ini_file >/dev/null 2>&1 &
+        RETVAL=$?
+    fi
+
+    tips="Starting $KIND services: "
+    if [ $RETVAL -ne 0 ];then
+        echo "$tips FAILED"
+    else
+        echo "$tips SUCCESS"
+    fi
+    return $RETVAL
+}
+
+stop() {
+    status
+    if [ $? -eq 0 ];then
+        if [ -f $pid_file ];then
+            pid=`cat $pid_file`
+            echo "Kill pid: $pid"
+            if [ -n $pid ];then
+                cat /dev/null > $pid_file
+                kill -9 $pid
+                RETVAL=$?
+            fi
+        fi
+    fi
+
+    tips="Shutting down $KIND services: "
+    if [ $RETVAL -ne 0 ];then
+        echo "$tips FAILED"
+    else
+        echo "$tips SUCCESS"
+    fi
+    return $RETVAL
+}
+
+restart() {
+    stop
+    sleep 2
+    start
+}
+
+reload() {
+    status
+    if [ $? -eq 0 ];then
+        $uwsgi_bin --reload $pid_file
+        RETVAL=$?
+    fi
+    tips="Reloading $KIND services: "
+    sleep 3
+    if [ $RETVAL -ne 0 ];then
+        echo "$tips FAILED"
+    else
+        echo "$tips SUCCESS"
+    fi
+    return $RETVAL
+}
+status() {
+    tips="Status $KIND services: "
+    ret=`ps -ef | grep -v grep | grep $uwsgi_bin | grep -v status | grep -v stop | grep -v restart | grep -v reload | grep -v start`
+    if [ $? -eq 0 ];then
+        RETVAL=0
+    fi
+    if [ $RETVAL -ne 0 ];then
+        echo "$tips Not Running"
+    else
+        echo "$tips Is Running"
+    fi
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    reload)
+        reload
+        ;;
+    status)
+        status
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|reload|status}"
+        exit 1
+esac
+    exit $?

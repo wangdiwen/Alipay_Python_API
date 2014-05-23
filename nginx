@@ -1,0 +1,116 @@
+#!/bin/sh
+#
+# chkconfig: 35 90 90
+# description: Start and stop the Nginx server.
+
+# Avoid using root's TMPDIR
+unset TMPDIR
+
+RETVAL=1
+KIND="Nginx"
+nginx_bin=/opt/nginx-1.4.2/sbin/nginx
+pid_file=/opt/nginx-1.4.2/logs/nginx.pid
+access_log=/opt/nginx-1.4.2/logs/access.log
+error_log=/opt/nginx-1.4.2/logs/error.log
+
+[ -x $nginx_bin ] || exit 2
+
+# check exec user, must be root
+user=`whoami`
+if [ "$user" != 'root' ];then
+    echo 'Permission Deny, must be root...'
+    exit 1
+fi
+
+start() {
+    status
+    ret_code=$?
+    RETVAL=1
+    if [ $ret_code -ne 0 ];then
+        $nginx_bin &
+        RETVAL=$?
+    fi
+
+    tips="Starting $KIND services: "
+    if [ $RETVAL -ne 0 ];then
+        echo "$tips FAILED"
+    else
+        echo "$tips SUCCESS"
+    fi
+    return $RETVAL
+}
+
+stop() {
+    status
+    if [ $? -eq 0 ];then
+        ret=`ps -ef | grep -v grep | grep nginx | grep -v stop | grep -v restart | awk '{ print $2 }' | xargs kill -9`
+        RETVAL=$?
+    fi
+
+    tips="Shutting down $KIND services: "
+    if [ $RETVAL -ne 0 ];then
+        echo "$tips FAILED"
+    else
+        echo "$tips SUCCESS"
+    fi
+    return $RETVAL
+}
+
+restart() {
+    stop
+    sleep 2
+    start
+}
+
+reload() {
+    status
+    if [ $? -eq 0 ];then
+        if [ -f $pid_file ];then
+            $nginx_bin -s reload >/dev/null
+            RETVAL=$?
+        fi
+    fi
+
+    tips="Reloading $KIND services: "
+    if [ $RETVAL -ne 0 ];then
+        echo "$tips FAILED"
+    else
+        echo "$tips SUCCESS"
+    fi
+    return $RETVAL
+}
+status() {
+    tips="Status $KIND services: "
+    ret=`ps -ef | grep -v grep | grep nginx | grep -v status | grep -v reload | grep -v stop | grep -v restart | grep -v start`
+    if [ $? -eq 0 ];then
+        RETVAL=0
+    fi
+    if [ $RETVAL -ne 0 ];then
+        echo "$tips Not Running"
+    else
+        echo "$tips Is Running"
+    fi
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    reload)
+        reload
+        ;;
+    status)
+        status
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|reload|status}"
+        exit 1
+esac
+    exit $?
