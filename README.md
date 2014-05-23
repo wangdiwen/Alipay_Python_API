@@ -53,15 +53,16 @@ html = submit.alipay_submit()
 
 运行项目：
 ==================
-# python2.7 manager.py runserver 0.0.0.0:8000
+$ python2.7 manager.py runserver 0.0.0.0:8000
 
 或者使用项目中给出的 uwsgi 方式开启 Web 服务器，但是要求你的服务器上面已经提供了 uwsgi 程式；
 
-# uwsgi --http 0.0.0.0:8000 --chdir /opt/www/mysite/mysite/ --module django_uwsgi
+$ uwsgi --http 0.0.0.0:8000 --chdir /opt/www/mysite/mysite/ --module django_uwsgi
 
 
 浏览器验证：
 ==================
+你可以将 URL 改为自己的 Web 服务器的地址（包含端口）
 1、即时到帐功能
 
 浏览器输入 url http://192.168.1.199:8000
