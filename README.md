@@ -7,7 +7,7 @@ Note:
 =================
 这个仓库是支付宝接口的 Python 版本，提供了即时到帐和双功能（担保交易）2种功能。
 
-其中 Web 项目基于 Django，
+此 Alipay 的 API 基于完整的 Django 框架，但是很容易移植到其他 Python 项目中，核心的 Class API 在 thirt_part/ 目录下面，控制支付交易流程通过 application/controller 目录下面的代码实现。
 
 支付宝接口功能的 API 和 Lib 在项目结构目录的 third_part 目录中，
 
